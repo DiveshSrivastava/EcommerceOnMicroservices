@@ -2,11 +2,6 @@
 {
     public class ShoppingCart
     {
-        public ShoppingCart()
-        {
-
-        }
-
         public ShoppingCart(string userName)
         {
             UserName = userName;

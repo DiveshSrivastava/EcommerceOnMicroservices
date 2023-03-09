@@ -29,6 +29,7 @@ services:
         environment:
             - ASPNETCORE_ENVIRONMENT=Development
             - "CacheSettings:ConnectionString=basketdb:6379"
+            - "GrpcSettings:DiscountUrl=http://discount.grpc"
         depends_on: 
             - basketdb
         ports:
@@ -56,6 +57,46 @@ services:
         ports:
             - "8002:80"
        
+    discount.grpc:
+        container_name: discount.grpc
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Development
+            - "DatabaseSettings:ConnectionString=Server=discountdb;Port=5432;Database=DiscountDb;User Id=admin;Password=admin1234;"
+        depends_on:
+            - discountdb
+        ports:
+            - "8003:80"
+
+    orderdb:
+         container_name: orderdb
+         environment:
+            SA_PASSWORD: "SwN12345678"
+            ACCEPT_EULA: "Y"
+         restart: always
+         ports:
+            - "1433:1433"
+
+    ordering.api:
+        container_name: ordering.api
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Development
+            - "ConnectionStrings:OrderingConnectionString=Server=orderdb;Database=OrderDb;User Id=sa;Password=SwN12345678"  
+            - "EventBusSettings:HostAddress=amqp://guest:guest@rabbitmq:5672"
+        depends_on:
+            - orderdb
+        ports:
+            - "8004:80"
+
+    portainer:
+        container_name: portainer
+        restart: always
+        ports:
+            - "8080:8000"
+            - "9000:9000"
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - portainer_data:/data
+    
     pgadmin:
         container_name: pgadmin
         restart: always
@@ -67,15 +108,6 @@ services:
         volumes:
             - pgadmin_data:/root/.pgadmin
 
-    portainer:
-        container_name: portainer
-        restart: always
-        ports:
-            - "8080:8000"
-            - "9000:9000"
-        volumes:
-            - /var/run/docker.sock:/var/run/docker.sock
-            - portainer_data:/data
 
-
+ 
 
